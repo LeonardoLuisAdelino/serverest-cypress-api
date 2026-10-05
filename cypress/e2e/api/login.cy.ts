@@ -4,30 +4,13 @@ import { fazerLogin } from '../../support/api/login'
 
 
 describe('Login pela API', () => {
-	const criarUsuario = (email: string, password = 'Senha123') =>
-		cy.request({
-			method: 'POST',
-			url: '/usuarios',
-			body: {
-				nome: 'Usuário de teste',
-				email,
-				password,
-				administrador: 'false',
-			},
-		});
-
 	it('retorna 200 e um token com credenciais válidas', () => {
-		const email = `login-${Date.now()}@teste.com`;
-		const password = 'Senha123';
+		const usuario = gerarUsuario();
 
-		criarUsuario(email, password).then((respostaUsuario) => {
+		criarUsuario(usuario).then((respostaUsuario) => {
 			expect(respostaUsuario.status).to.eq(201);
 
-			cy.request({
-				method: 'POST',
-				url: '/login',
-				body: { email, password },
-			}).then((resposta) => {
+			fazerLogin(usuario.email, usuario.password).then((resposta) => {
 				expect(resposta.status).to.eq(200);
 				expect(resposta.body.authorization).to.be.a('string').and.not.be.empty;
 			});
@@ -35,14 +18,14 @@ describe('Login pela API', () => {
 	});
 
 	it('retorna erro e mensagem de credenciais inválidas para senha errada', () => {
-		const email = `senha-errada-${Date.now()}@teste.com`;
+		const usuario = gerarUsuario();
 
-		criarUsuario(email).then(() => {
+		criarUsuario(usuario).then(() => {
 			cy.request({
 				method: 'POST',
 				url: '/login',
 				failOnStatusCode: false,
-				body: { email, password: 'senha-incorreta' },
+				body: { email: usuario.email, password: 'senha-incorreta' },
 			}).then((resposta) => {
 				expect(resposta.status).to.eq(401);
 				expect(resposta.body.message).to.eq('Email e/ou senha inválidos');
@@ -51,13 +34,15 @@ describe('Login pela API', () => {
 	});
 
 	it('retorna erro para um e-mail inexistente', () => {
+		const usuario = gerarUsuario();
+
 		cy.request({
 			method: 'POST',
 			url: '/login',
 			failOnStatusCode: false,
 			body: {
-				email: `inexistente-${Date.now()}@teste.com`,
-				password: 'Senha123',
+				email: usuario.email,
+				password: usuario.password,
 			},
 		}).then((resposta) => {
 			expect(resposta.status).to.eq(401);
