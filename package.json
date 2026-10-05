@@ -1,0 +1,16 @@
+{
+  "name": "serverest-cypress-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+  "cy:open": "cypress open",
+  "cy:run": "cypress run"
+},
+  "keywords": [],
+  "type": "commonjs",
+  "devDependencies": {
+    "cypress": "^16.1.1",
+    "typescript": "^7.0.2"
+  }
+}
